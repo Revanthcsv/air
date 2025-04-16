@@ -24,19 +24,13 @@ with open(os.path.join(BASE_DIR, "all_sensors_data.json"), "r") as f:
     sensor_parameters_data = json.load(f)
 
 # API keys for data fetching
-api_keys = [
-    '007c6ade6a3835eddf41651b9dfff459cac26e760db15cabca670837c099e21a',
-    '6f6c13afd19d615c13ca0db64d397df609db7843bec9cd813d1645e71fc99b3b',
-    'dfebfc9f4dc60ac457ba5f421b68f9f73f72eee9f6e4b7f14d77174716af5b10',
-    'b9b63a5d19bad4cd7b3baa4da31b11b0a646b137e3e2e81c3f97b4b47d864407',
-    '363ee648f72bcff8c689e03bf485ed7edb0e4467c300aceeaf73ac94d056ba17',
-    'a437e50d9065c8504dbb3b8f907debba4dcfaf10c7a417c4646d801f8ec7533a',
-    'c3a4703bf1e57d93c8af8eb3041e2aa27016a8acb768ee63007a394d1221a898',
-    '9f05a3e562ab8e347efeb3f25ecfdea31daf75ca8c27e3e19a9d498290dd8f58',
-    '22444e8d29ac1096ae9f66a1d115e5941098bcc5bdfcfd4cef9e1fe2050ceecd',
-    '8f6121ec47a0179e07c604eeddb69636208a24f40fb64d0f0a25bfeecff589ce',
-    '3c7d6c5bba888aadb797f3013b37920b86d2a84196041abfbd4fe372a2408408'
-]
+with open("secrets.json", "r") as f:
+    secrets = json.load(f)
+
+# Build the API keys list (first key under "openaq-api-key" and the rest from "openaq-api-key_2" to "openaq-api-key_10")
+api_keys = []
+for i in range(1, 12):
+    api_keys.append(secrets[f"openaq-api-key_{i}"])
 
 # Create a dictionary for quick lookup by sensor_id
 sensor_parameters = {}
