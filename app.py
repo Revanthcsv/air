@@ -12,11 +12,6 @@ import random
 import time
 import os
 from dotenv import load_dotenv
-import logging
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
@@ -35,19 +30,9 @@ with open(os.path.join(BASE_DIR, "all_sensors_data.json"), "r") as f:
 # Build the API keys list from environment variables
 api_keys = []
 for i in range(1, 12):
-    key = os.getenv(f'OPENAQ_API_KEY_{i}')
-    if key and key.strip():  # Check if key exists and is not empty
-        api_keys.append(key.strip())
-        logger.info(f"Successfully loaded API key {i}")
-    else:
-        logger.warning(f"API key {i} not found or empty in environment variables")
-
-if not api_keys:
-    error_msg = "No valid API keys found in environment variables! Please add at least one OPENAQ_API_KEY_1 through OPENAQ_API_KEY_11 to your environment variables."
-    logger.error(error_msg)
-    raise ValueError(error_msg)
-
-logger.info(f"Successfully loaded {len(api_keys)} API keys")
+    key = os.environ.get(f'OPENAQ_API_KEY_{i}')
+    if key:
+        api_keys.append(key)
 
 # Create a dictionary for quick lookup by sensor_id
 sensor_parameters = {}
@@ -165,16 +150,12 @@ def get_aqi_category(aqi_value):
 
 # Function to fetch data for a specific location
 def fetch_location_data(location_id, location_name):
-    if not api_keys:
-        logger.error("No API keys available for fetching data")
-        return pd.DataFrame()  # Return empty DataFrame if no API keys
-        
-    api_index = random.randint(0, len(api_keys) - 1)  # Use len(api_keys) - 1 to avoid index out of range
+    api_index = random.randint(0, 10)
     results_list = []
     
     headers = {
         "accept": "application/json",
-        "X-API-Key": api_keys[api_index]
+        "X-API-Key": api_keys[api_index % len(api_keys)]
     }
     
     url = f"https://api.openaq.org/v3/locations/{location_id}/latest?limit=1000"
@@ -187,6 +168,7 @@ def fetch_location_data(location_id, location_name):
         response = requests.get(url, headers=headers)
         response.raise_for_status()
         data = response.json()
+
         
         for result in data.get('results', []):
             utc_str = result['datetime']['utc']
@@ -218,7 +200,7 @@ def fetch_location_data(location_id, location_name):
         time.sleep(1 / len(api_keys))
         
     except requests.exceptions.RequestException as e:
-        logger.error(f"Error fetching data for location {location_id}: {str(e)}")
+        print(f"Error for location {location_id}: {e}")
         time.sleep(1)
     
     return pd.DataFrame(results_list)
@@ -718,6 +700,6 @@ def update_info_panel(selected_location, n_intervals):
 # 6. Run App
 # ------------------------------------
 if __name__ == "__main__":
-    # Pick up the PORT environment variable; default to 8050 if it's not defined.
+    # Pick up the PORT environment variable; default to 8050 if it’s not defined.
     port = int(os.environ.get("PORT", 8050))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    app.run_server(host="0.0.0.0", port=port, debug=False)
