@@ -15,11 +15,17 @@ from dotenv import load_dotenv
 import logging
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
+
+# Print all environment variables for debugging (excluding their values for security)
+logger.info("Available environment variables: %s", [k for k in os.environ.keys()])
 
 # ------------------------------------
 # 1. Data Loading & Preprocessing
@@ -35,19 +41,20 @@ with open(os.path.join(BASE_DIR, "all_sensors_data.json"), "r") as f:
 # Build the API keys list from environment variables
 api_keys = []
 for i in range(1, 12):
-    key = os.environ.get(f'OPENAQ_API_KEY_{i}')
-    if key and key.strip():  # Check if key exists and is not empty
+    key_name = f'OPENAQ_API_KEY_{i}'
+    key = os.environ.get(key_name)
+    if key and key.strip():
         api_keys.append(key.strip())
-        logger.info(f"Successfully loaded API key {i}")
+        logger.info(f"Successfully loaded {key_name}")
     else:
-        logger.warning(f"API key {i} not found or empty in environment variables")
+        logger.warning(f"{key_name} not found or empty in environment variables")
 
 if not api_keys:
-    error_msg = "No valid API keys found in environment variables! Please add at least one OPENAQ_API_KEY_1 through OPENAQ_API_KEY_11 to your environment variables."
+    error_msg = "No valid API keys found in environment variables! Please check your Railway environment variables."
     logger.error(error_msg)
     raise ValueError(error_msg)
 
-logger.info(f"Successfully loaded {len(api_keys)} API keys")
+logger.info(f"Total API keys loaded: {len(api_keys)}")
 
 # Create a dictionary for quick lookup by sensor_id
 sensor_parameters = {}
