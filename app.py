@@ -11,6 +11,10 @@ import json
 import random
 import time
 import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # ------------------------------------
 # 1. Data Loading & Preprocessing
@@ -23,14 +27,12 @@ locations_df = pd.read_csv(os.path.join(BASE_DIR, 'locations.csv'))
 with open(os.path.join(BASE_DIR, "all_sensors_data.json"), "r") as f:
     sensor_parameters_data = json.load(f)
 
-# API keys for data fetching
-with open("secrets.json", "r") as f:
-    secrets = json.load(f)
-
-# Build the API keys list (first key under "openaq-api-key" and the rest from "openaq-api-key_2" to "openaq-api-key_10")
+# Build the API keys list from environment variables
 api_keys = []
 for i in range(1, 12):
-    api_keys.append(secrets[f"openaq-api-key_{i}"])
+    key = os.getenv(f'OPENAQ_API_KEY_{i}')
+    if key:
+        api_keys.append(key)
 
 # Create a dictionary for quick lookup by sensor_id
 sensor_parameters = {}
@@ -699,5 +701,4 @@ def update_info_panel(selected_location, n_intervals):
 # ------------------------------------
 if __name__ == "__main__":
     # Pick up the PORT environment variable; default to 8050 if it’s not defined.
-    port = int(os.environ.get("PORT", 8050))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    app.run( debug=True)
