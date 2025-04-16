@@ -701,4 +701,5 @@ def update_info_panel(selected_location, n_intervals):
 # ------------------------------------
 if __name__ == "__main__":
     # Pick up the PORT environment variable; default to 8050 if it’s not defined.
-    app.run( debug=True)
+    port = int(os.environ.get("PORT", 8050))
+    app.run_server(host="0.0.0.0", port=port, debug=False)
