@@ -241,6 +241,9 @@ app = dash.Dash(
     ]
 )
 
+# Expose the Flask server for gunicorn
+server = app.server
+
 # Color palette for a modern dark design
 colors = {
     'background': '#000000',
@@ -726,10 +729,7 @@ def update_info_panel(selected_location, n_intervals):
 # ------------------------------------
 if __name__ == "__main__":
     # Get port from environment variable or default to 8050
-    port = int(os.environ.get("PORT", 8050))
-    
-    # Configure server for production
-    server = app.server
+    port = int(os.environ.get("PORT", 8080))
     
     # Run the app
     app.run(
